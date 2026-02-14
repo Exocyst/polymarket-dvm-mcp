@@ -2,77 +2,77 @@
 
 A Model Context Protocol (MCP) server that interfaces with the Polymarket Data Verification Mechanism (DVM) via Nostr. This server allows AI agents to search for prediction markets and obtain detailed AI summaries.
 
-## Features
+## Getting Started (Quick Start)
 
-- **Search Markets**: Search for prediction markets on Polymarket using keywords.
-- **AI Summary**: Get deep market analysis and AI-generated summaries for specific markets using their numerical IDs.
-- **Payment Handling**: Seamlessly handles Nostr DVM feedback (Kind 7000), providing lightning invoices when payment is required for searches or summaries.
-- **NDK Integration**: Uses the Nostr Dev Kit (NDK) for robust Nostr communication.
+The easiest way to use this server is via `npx`. You do not need to install anything globally.
 
-## Prerequisites
+### Direct Execution
 
-- Node.js (v18 or higher)
-- npm or yarn
+To run the server directly from your terminal:
 
-## Installation
+```bash
+# Set your Nostr private key (optional, will generate random if missing)
+export NOSTR_NSEC=nsec1...
 
-1. Clone the repository and navigate to the project directory.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Build the project:
-   ```bash
-   npm run build
-   ```
+# Execute with npx
+npx polymarket-dvm-mcp
+```
+
+### Using with Claude Desktop
+
+To add this server to Claude Desktop, add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "polymarket": {
+      "command": "npx",
+      "args": ["-y", "polymarket-dvm-mcp"],
+      "env": {
+        "NOSTR_NSEC": "your_nsec_here"
+      }
+    }
+  }
+}
+```
 
 ## Configuration
 
-The server can be configured via environment variables:
+The server is configured via environment variables:
 
-- `NOSTR_NSEC`: (Optional) Your Nostr private key in `nsec` format. If not provided, a random identity will be generated for each session.
+- `NOSTR_NSEC`: (Optional) Your Nostr private key in `nsec` format. Used for signing Nostr events. If omitted, the server will generate an ephemeral identity for the session.
 
-## Usage
+## MCP Tools
 
-### Running the Server
+The server provides tools for searching and analyzing prediction markets:
 
-Start the server using `ts-node`:
+1.  **`search_polymarket`**: Search for active markets on Polymarket.
+    - Argument: `query` (e.g., "Will Bitcoin hit $100k in 2025?")
+2.  **`get_market`**: Obtain a deep AI analysis for a specific market.
+    - Argument: `marketId` (The numerical ID returned from search results)
+
+> [!NOTE]
+> Some requests may return a Lightning Invoice if the DVM requires payment for the analysis due to high utilization.
+
+## Alternative Installation
+
+### Docker
+
 ```bash
+docker build -t polymarket-dvm-mcp .
+docker run -i -e NOSTR_NSEC=your_nsec_here polymarket-dvm-mcp
+```
+
+### Manual Build (From Source)
+
+```bash
+git clone https://github.com/yourusername/polymarket-dvm-mcp.git
+cd polymarket-dvm-mcp
+npm install
+npm run build
 npm start
 ```
 
-Or run the compiled JavaScript (after building):
-```bash
-npm run serve
-```
+## Security
 
-### MCP Tools
-
-The server exposes the following tools to MCP clients (like Claude Desktop):
-
-1. **`search_polymarket`**
-   - **Description**: Search for prediction markets. Returns markets with their questions and IDs.
-   - **Arguments**: `query` (string)
-   - **Note**: May return a lightning invoice during high utilization.
-
-2. **`get_market`**
-   - **Description**: Get a detailed AI summary for a specific market.
-   - **Arguments**: `marketId` (string, the numerical ID from search results)
-   - **Note**: Usually requires payment via lightning invoice.
-
-## Deployment with Docker
-
-You can run the MCP server using Docker:
-
-1. Build the image:
-   ```bash
-   docker build -t polymarket-dvm-mcp .
-   ```
-2. Run the container:
-   ```bash
-   docker run -i -e NOSTR_NSEC=your_nsec_here polymarket-dvm-mcp
-   ```
-
-## Security Note
-
-Your `nsec` is sensitive information. Never commit it to version control. Use environment variables to pass it safely to the application.
+Your `nsec` is a private key. Handle it with the same care as a password or API secret. For most use cases, leaving it blank and using an ephemeral key (default) is recommended.

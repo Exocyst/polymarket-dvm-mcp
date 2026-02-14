@@ -1,0 +1,12 @@
+# Source files
+src/
+tsconfig.json
+.git
+.gitignore
+.dockerignore
+Dockerfile
+package-lock.json
+
+# Build files that shouldn't be in root (handled by "files" in package.json)
+node_modules/
+dist/*.map
