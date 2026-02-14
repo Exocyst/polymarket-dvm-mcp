@@ -6,21 +6,28 @@ A Model Context Protocol (MCP) server that interfaces with the Polymarket Data V
 
 The easiest way to use this server is via `npx`. You do not need to install anything globally.
 
-### Direct Execution
+### 1. Configure Environment
 
-To run the server directly from your terminal:
+Create a `.env` file in your current directory (or where you run the server) and add your Nostr private key:
+
+```env
+NOSTR_NSEC=nsec1...
+```
+
+> [!TIP]
+> If you don't provide a `NOSTR_NSEC`, the server will generate a random, ephemeral identity for the session.
+
+### 2. Run with npx
+
+To run the server directly:
 
 ```bash
-# Set your Nostr private key (optional, will generate random if missing)
-export NOSTR_NSEC=nsec1...
-
-# Execute with npx
 npx polymarket-dvm-mcp
 ```
 
-### Using with Claude Desktop
+### 3. Using with Claude Desktop
 
-To add this server to Claude Desktop, add the following to your `claude_desktop_config.json`:
+To add this server to Claude Desktop, update your `claude_desktop_config.json`:
 
 ```json
 {
@@ -36,34 +43,26 @@ To add this server to Claude Desktop, add the following to your `claude_desktop_
 }
 ```
 
-## Configuration
-
-The server is configured via environment variables:
-
-- `NOSTR_NSEC`: (Optional) Your Nostr private key in `nsec` format. Used for signing Nostr events. If omitted, the server will generate an ephemeral identity for the session.
+> [!NOTE]
+> For Claude Desktop, it's often easier to define the `env` block directly in the config as shown above, but the server will also check for a `.env` file in its execution context.
 
 ## MCP Tools
 
 The server provides tools for searching and analyzing prediction markets:
 
 1.  **`search_polymarket`**: Search for active markets on Polymarket.
-    - Argument: `query` (e.g., "Will Bitcoin hit $100k in 2025?")
 2.  **`get_market`**: Obtain a deep AI analysis for a specific market.
-    - Argument: `marketId` (The numerical ID returned from search results)
 
-> [!NOTE]
-> Some requests may return a Lightning Invoice if the DVM requires payment for the analysis due to high utilization.
-
-## Alternative Installation
+## Alternative Options
 
 ### Docker
 
 ```bash
 docker build -t polymarket-dvm-mcp .
-docker run -i -e NOSTR_NSEC=your_nsec_here polymarket-dvm-mcp
+docker run -i --env-file .env polymarket-dvm-mcp
 ```
 
-### Manual Build (From Source)
+### Manual Build
 
 ```bash
 git clone https://github.com/yourusername/polymarket-dvm-mcp.git
@@ -75,4 +74,4 @@ npm start
 
 ## Security
 
-Your `nsec` is a private key. Handle it with the same care as a password or API secret. For most use cases, leaving it blank and using an ephemeral key (default) is recommended.
+Your `nsec` is a private key. Handle it with the same care as a password or API secret. Using a `.env` file (and ensuring it's in your `.gitignore`) is the recommended way to manage this.
