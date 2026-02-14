@@ -19,13 +19,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         tools: [
             {
                 name: "search_polymarket",
-                description: "Search for markets on Polymarket using keywords.",
+                description: "Search for prediction markets on Polymarket. Returns a list of markets with their questions, descriptions, and numerical 'id' values. Use these numerical IDs to call 'get_market' for detailed analysis. Note: May return a JSON object with a lightning invoice if payment is required due to high utilization.",
                 inputSchema: {
                     type: "object",
                     properties: {
                         query: {
                             type: "string",
-                            description: "The search term or question to search for.",
+                            description: "The search term or question to search for (e.g., 'Will Bitcoin hit $100k?').",
                         },
                     },
                     required: ["query"],
@@ -33,13 +33,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             {
                 name: "get_market",
-                description: "Get a detailed AI summary and market data for a specific Polymarket event using its numerical ID.",
+                description: "Get a detailed AI summary and deep market analysis for a specific Polymarket event. Requires a numerical market 'id' obtained from 'search_polymarket'. If the DVM requires payment for the AI summary, this tool will return a lightning invoice to be paid before the summary is provided.",
                 inputSchema: {
                     type: "object",
                     properties: {
                         marketId: {
                             type: "string",
-                            description: "The 6-digit (or numerical) market ID from the search results (e.g., '956590').",
+                            description: "The numerical market ID from search results (e.g., '956590').",
                         },
                     },
                     required: ["marketId"],
