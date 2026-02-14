@@ -11,8 +11,30 @@ const server = new Server({
         tools: {},
     },
 });
+// Helper for structured logging to stderr (to avoid interfering with MCP stdio)
+const log = (level, message, data) => {
+    const timestamp = new Date().toISOString();
+    console.error(JSON.stringify({ timestamp, level, message, data }));
+};
 const nsec = process.env.NOSTR_NSEC;
-const signer = nsec ? new NDKPrivateKeySigner(nsec) : undefined;
+let signer;
+if (nsec) {
+    try {
+        if (!nsec.startsWith('nsec1')) {
+            throw new Error("Invalid nsec format. Must start with 'nsec1'");
+        }
+        signer = new NDKPrivateKeySigner(nsec);
+        log("INFO", "Nostr identity loaded from NOSTR_NSEC");
+    }
+    catch (e) {
+        log("ERROR", `Failed to initialize Nostr signer: ${e.message}`);
+        process.exit(1);
+    }
+}
+else {
+    log("INFO", "No NOSTR_NSEC provided, generating random identity");
+    signer = NDKPrivateKeySigner.generate();
+}
 const nostrClient = new NostrClient(signer);
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
@@ -51,9 +73,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     try {
+        log("DEBUG", `Connecting to Nostr relays for tool: ${name}`);
         await nostrClient.connect();
         if (name === "search_polymarket") {
             const query = String(args?.query);
+            log("INFO", "Performing Polymarket search", { query });
             const result = await nostrClient.requestSearch(query);
             if ("status" in result && result.status === "payment-required") {
                 return {
@@ -76,6 +100,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         if (name === "get_market") {
             const marketId = String(args?.marketId);
+            log("INFO", "Fetching market summary", { marketId });
             const result = await nostrClient.requestSummary(marketId);
             if ("status" in result && result.status === "payment-required") {
                 return {
