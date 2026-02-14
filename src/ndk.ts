@@ -91,6 +91,7 @@ export class NostrClient {
             const filter: NDKFilter = {
                 kinds: kinds,
                 '#e': [requestEvent.id],
+                authors: [DVM_PUBKEY],
             };
 
             const timeout = setTimeout(() => {

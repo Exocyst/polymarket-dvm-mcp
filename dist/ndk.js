@@ -50,6 +50,7 @@ export class NostrClient {
             const filter = {
                 kinds: kinds,
                 '#e': [requestEvent.id],
+                authors: [DVM_PUBKEY],
             };
             const timeout = setTimeout(() => {
                 if (!resolved) {
