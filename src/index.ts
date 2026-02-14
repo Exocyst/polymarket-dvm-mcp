@@ -12,7 +12,7 @@ import { NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 const server = new Server(
     {
         name: "polymarket-dvm-mcp",
-        version: "0.1.0",
+        version: "1.0.1",
     },
     {
         capabilities: {
